@@ -31,43 +31,68 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <SignedIn>
-                <div>Dashboard Page (To be implemented)</div>
-              </SignedIn>
+              <>
+                <SignedIn>
+                  <div>Dashboard Page (To be implemented)</div>
+                </SignedIn>
+                <SignedOut>
+                  <Navigate to="/sign-in" replace />
+                </SignedOut>
+              </>
             }
           />
           <Route
             path="/dashboard/performance"
             element={
-              <SignedIn>
-                <PerformancePage />
-              </SignedIn>
+              <>
+                <SignedIn>
+                  <PerformancePage />
+                </SignedIn>
+                <SignedOut>
+                  <Navigate to="/sign-in" replace />
+                </SignedOut>
+              </>
             }
           />
           <Route
             path="/dashboard/students"
             element={
-              <SignedIn>
-                <StudentsPage />
-              </SignedIn>
+              <>
+                <SignedIn>
+                  <StudentsPage />
+                </SignedIn>
+                <SignedOut>
+                  <Navigate to="/sign-in" replace />
+                </SignedOut>
+              </>
             }
           />
 
           {/* Public Routes */}
           <Route
-            path="/sign-in"
+            path="/sign-in/*"
             element={
-              <SignedOut>
-                <LoginPage />
-              </SignedOut>
+              <>
+                <SignedOut>
+                  <LoginPage />
+                </SignedOut>
+                <SignedIn>
+                  <Navigate to="/dashboard" replace />
+                </SignedIn>
+              </>
             }
           />
           <Route
-            path="/sign-up"
+            path="/sign-up/*"
             element={
-              <SignedOut>
-                <SignUpPage />
-              </SignedOut>
+              <>
+                <SignedOut>
+                  <SignUpPage />
+                </SignedOut>
+                <SignedIn>
+                  <Navigate to="/dashboard" replace />
+                </SignedIn>
+              </>
             }
           />
         </Routes>
