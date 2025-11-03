@@ -40,11 +40,11 @@ function dashboardReducer(state, action) {
     case ActionTypes.FETCH_DASHBOARD_SUCCESS:
       return {
         ...state,
-        kpiData: action.payload.kpiData,
-        trendData: action.payload.trendData,
-        departmentData: action.payload.departmentData,
-        budgetData: action.payload.budgetData,
-        lastUpdated: action.payload.lastUpdated,
+        kpiData: action.payload.kpi_data || action.payload.kpiData,
+        trendData: action.payload.trend_data || action.payload.trendData,
+        departmentData: action.payload.department_data || action.payload.departmentData,
+        budgetData: action.payload.budget_data || action.payload.budgetData,
+        lastUpdated: action.payload.last_updated || action.payload.lastUpdated,
         isLoading: false,
         error: null,
       };

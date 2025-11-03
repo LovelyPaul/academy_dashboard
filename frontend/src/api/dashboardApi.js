@@ -17,7 +17,7 @@ export const fetchDashboardData = async (token) => {
   const client = createAuthenticatedClient(token);
 
   try {
-    const response = await client.get('/dashboard/');
+    const response = await client.get('/dashboard/dashboard/');
     return response.data;
   } catch (error) {
     if (error.response) {
