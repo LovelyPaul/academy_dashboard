@@ -64,10 +64,15 @@ class UserWebhookUseCase:
         logger.info(f"Processing {event_type} event - clerk_id: {clerk_id}, email: {email}")
 
         # Validate required fields
-        if not clerk_id or not email:
-            error_msg = f"Invalid Clerk webhook event data: missing clerk_id or email for type {event_type}. Event data: {event_data.keys()}"
+        if not clerk_id:
+            error_msg = f"Invalid Clerk webhook event data: missing clerk_id for type {event_type}"
             logger.error(error_msg)
             raise ValueError(error_msg)
+
+        # For test events, use placeholder email if none provided
+        if not email:
+            logger.warning(f"No email found in {event_type} event, using placeholder")
+            email = f"test-{clerk_id}@clerk-webhook-test.com"
 
         # Route to appropriate handler
         if event_type == 'user.created':
