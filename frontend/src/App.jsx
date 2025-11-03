@@ -11,12 +11,12 @@ import { theme } from './styles/theme';
 // Import pages
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
+import DashboardPage from './pages/DashboardPage';
 import PerformancePage from './pages/PerformancePage';
+import PapersPage from './pages/PapersPage';
 import StudentsPage from './pages/StudentsPage';
-
-// Import layouts (will be used when pages are created)
-// import { MainLayout } from './layouts/MainLayout';
-// import { AuthLayout } from './layouts/AuthLayout';
+import BudgetPage from './pages/BudgetPage';
+import UploadPage from './pages/UploadPage';
 
 function App() {
   return (
@@ -33,7 +33,7 @@ function App() {
             element={
               <>
                 <SignedIn>
-                  <div>Dashboard Page (To be implemented)</div>
+                  <DashboardPage />
                 </SignedIn>
                 <SignedOut>
                   <Navigate to="/sign-in" replace />
@@ -55,11 +55,50 @@ function App() {
             }
           />
           <Route
+            path="/dashboard/papers"
+            element={
+              <>
+                <SignedIn>
+                  <PapersPage />
+                </SignedIn>
+                <SignedOut>
+                  <Navigate to="/sign-in" replace />
+                </SignedOut>
+              </>
+            }
+          />
+          <Route
             path="/dashboard/students"
             element={
               <>
                 <SignedIn>
                   <StudentsPage />
+                </SignedIn>
+                <SignedOut>
+                  <Navigate to="/sign-in" replace />
+                </SignedOut>
+              </>
+            }
+          />
+          <Route
+            path="/dashboard/budget"
+            element={
+              <>
+                <SignedIn>
+                  <BudgetPage />
+                </SignedIn>
+                <SignedOut>
+                  <Navigate to="/sign-in" replace />
+                </SignedOut>
+              </>
+            }
+          />
+          <Route
+            path="/admin/upload"
+            element={
+              <>
+                <SignedIn>
+                  <UploadPage />
                 </SignedIn>
                 <SignedOut>
                   <Navigate to="/sign-in" replace />

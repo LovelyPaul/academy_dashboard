@@ -53,7 +53,7 @@ export const ChartsSection = () => {
   const departmentChartData = transformToBarChartData(
     state.departmentStats,
     'department',
-    'student_count',
+    'count',
     {
       label: '학생 수',
       backgroundColor: 'rgba(54, 162, 235, 0.6)',
@@ -61,10 +61,10 @@ export const ChartsSection = () => {
     }
   );
 
-  // Transform grade data - combine program_type and grade for labels
+  // Transform grade data - use grade number for labels
   const gradeDataWithLabels = state.gradeDistribution.map(item => ({
     ...item,
-    label: item.grade === 0 ? `${item.program_type} (대학원)` : `${item.program_type} ${item.grade}학년`
+    label: item.grade === 0 ? '대학원' : `${item.grade}학년`
   }));
 
   const gradeChartData = transformToPieChartData(
@@ -76,15 +76,15 @@ export const ChartsSection = () => {
   // Transform enrollment trend data with multiple datasets
   const trendChartData = transformToMultiDatasetChart(
     state.enrollmentTrend,
-    'year',
-    ['admission_count', 'graduation_count'],
+    'admission_year',
+    ['total', 'enrolled'],
     'line'
   );
 
   // Update dataset labels to Korean
   if (trendChartData.datasets.length >= 2) {
-    trendChartData.datasets[0].label = '입학 수';
-    trendChartData.datasets[1].label = '졸업 수';
+    trendChartData.datasets[0].label = '전체 학생';
+    trendChartData.datasets[1].label = '재학생';
   }
 
   return (

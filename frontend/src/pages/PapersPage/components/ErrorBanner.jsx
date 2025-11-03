@@ -26,7 +26,7 @@ export function ErrorBanner() {
         action={
           error.code !== '401' && (
             <Button color="inherit" size="small" onClick={handleRetry}>
-              Retry
+              다시 시도
             </Button>
           )
         }

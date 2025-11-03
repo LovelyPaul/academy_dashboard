@@ -11,6 +11,7 @@ const initialState = {
   departmentStats: [],
   gradeDistribution: [],
   enrollmentTrend: [],
+  totalStudents: 0,
   loading: true,
   error: null,
   chartLoadingStatus: {
@@ -34,9 +35,10 @@ function studentsAnalysisReducer(state, action) {
       return {
         ...state,
         loading: false,
-        departmentStats: action.payload.department_stats,
-        gradeDistribution: action.payload.grade_distribution,
-        enrollmentTrend: action.payload.enrollment_trend,
+        totalStudents: action.payload.total_students || 0,
+        departmentStats: action.payload.department_stats || [],
+        gradeDistribution: action.payload.grade_distribution || [],
+        enrollmentTrend: action.payload.enrollment_trend || [],
         error: null,
       };
 
@@ -95,7 +97,7 @@ export const StudentsAnalysisProvider = ({ children }) => {
       if (state.selectedGrade !== null) params.append('grade', String(state.selectedGrade));
       params.append('year', String(state.selectedYear));
 
-      const response = await client.get(`/students/analytics?${params.toString()}`);
+      const response = await client.get(`/dashboard/students/analytics?${params.toString()}`);
 
       dispatch({
         type: 'FETCH_STUDENTS_SUCCESS',
@@ -139,11 +141,8 @@ export const StudentsAnalysisProvider = ({ children }) => {
     return fetchStudentsData();
   }, [fetchStudentsData]);
 
-  // Computed values
-  const totalStudents = useMemo(
-    () => state.departmentStats.reduce((sum, dept) => sum + dept.student_count, 0),
-    [state.departmentStats]
-  );
+  // Computed values - use totalStudents from API response
+  const totalStudents = state.totalStudents;
 
   const departmentCount = useMemo(
     () => state.departmentStats.length,
@@ -157,9 +156,11 @@ export const StudentsAnalysisProvider = ({ children }) => {
 
   const largestDepartment = useMemo(() => {
     if (state.departmentStats.length === 0) return null;
-    return state.departmentStats.reduce((max, dept) =>
-      dept.student_count > max.student_count ? dept : max
-    ).department;
+    return state.departmentStats.reduce((max, dept) => {
+      const deptCount = dept.count || dept.student_count || 0;
+      const maxCount = max.count || max.student_count || 0;
+      return deptCount > maxCount ? dept : max;
+    }).department;
   }, [state.departmentStats]);
 
   // Filter options

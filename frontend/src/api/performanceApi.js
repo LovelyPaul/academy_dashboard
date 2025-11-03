@@ -24,7 +24,7 @@ export const fetchPerformanceData = async (client, filters = {}) => {
   if (filters.project) params.append('project', filters.project);
 
   const queryString = params.toString();
-  const url = queryString ? `/performance/?${queryString}` : '/performance/';
+  const url = queryString ? `/dashboard/performance/?${queryString}` : '/dashboard/performance/';
 
   const response = await client.get(url);
   return response.data;

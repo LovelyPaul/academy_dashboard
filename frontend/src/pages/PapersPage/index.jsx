@@ -28,7 +28,7 @@ function PapersPageContent() {
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Papers Analysis
+        논문 분석
       </Typography>
 
       <ErrorBanner />

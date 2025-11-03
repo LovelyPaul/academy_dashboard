@@ -7,6 +7,7 @@
 import { Card, CardHeader, CardContent, Skeleton } from '@mui/material';
 import { useDashboard } from '../../context/DashboardContext';
 import { LineChart } from '../charts/LineChart';
+import { EmptyState } from '../common/EmptyState';
 import { transformToLineChartData } from '../../services/dataTransformer';
 
 /**
@@ -34,7 +35,12 @@ export const TrendChartSection = () => {
       <Card>
         <CardHeader title="기간별 추이" />
         <CardContent>
-          <p>데이터가 없습니다.</p>
+          <EmptyState
+            title="추이 데이터가 없습니다"
+            description="연도별 실적 추이를 확인할 수 있는 데이터가 없습니다."
+            icon="chart"
+            minimal
+          />
         </CardContent>
       </Card>
     );

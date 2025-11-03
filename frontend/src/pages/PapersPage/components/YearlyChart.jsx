@@ -5,6 +5,7 @@
 import React, { useMemo } from 'react';
 import { Card } from '../../../components/common/Card';
 import { LineChart } from '../../../components/charts/LineChart';
+import { EmptyState } from '../../../components/common/EmptyState';
 import { transformToLineChartData } from '../../../services/dataTransformer';
 import { usePapersContext } from '../PapersContext';
 
@@ -17,7 +18,7 @@ export function YearlyChart() {
       return null;
     }
     return transformToLineChartData(yearlyData, 'year', 'count', {
-      label: 'Publications',
+      label: '논문 수',
       borderColor: 'rgb(75, 192, 192)',
       backgroundColor: 'rgba(75, 192, 192, 0.2)'
     });
@@ -32,7 +33,7 @@ export function YearlyChart() {
       },
       title: {
         display: true,
-        text: 'Publications by Year'
+        text: '연도별 논문 수'
       }
     },
     scales: {
@@ -47,9 +48,9 @@ export function YearlyChart() {
 
   if (isLoading) {
     return (
-      <Card title="Publications by Year">
+      <Card title="연도별 논문 수">
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          Loading...
+          로딩 중...
         </div>
       </Card>
     );
@@ -57,16 +58,19 @@ export function YearlyChart() {
 
   if (!chartData) {
     return (
-      <Card title="Publications by Year">
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          No data available
-        </div>
+      <Card title="연도별 논문 수">
+        <EmptyState
+          title="논문 데이터가 없습니다"
+          description="아직 등록된 논문 데이터가 없습니다. 데이터를 업로드하여 연도별 논문 통계를 확인하세요."
+          icon="chart"
+          minimal
+        />
       </Card>
     );
   }
 
   return (
-    <Card title="Publications by Year">
+    <Card title="연도별 논문 수">
       <LineChart data={chartData} options={chartOptions} />
     </Card>
   );

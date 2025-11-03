@@ -146,21 +146,20 @@ const PerformanceContext = createContext(null);
 // Context Provider Component
 export function PerformanceProvider({ children }) {
   const [state, dispatch] = useReducer(performanceReducer, initialState);
-  const { client } = useApiClient();
+  const { getAuthenticatedClient } = useApiClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Fetch Performance Data
-  const fetchData = useCallback(async () => {
-    if (!client) return;
-
+  const fetchData = useCallback(async (filters) => {
     dispatch({ type: ActionTypes.FETCH_PERFORMANCE_REQUEST });
 
     try {
+      const client = await getAuthenticatedClient();
       const data = await fetchPerformanceData(client, {
-        startDate: state.filters.startDate,
-        endDate: state.filters.endDate,
-        department: state.filters.department,
-        project: state.filters.project,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        department: filters.department,
+        project: filters.project,
       });
 
       dispatch({
@@ -176,7 +175,7 @@ export function PerformanceProvider({ children }) {
         },
       });
     }
-  }, [client, state.filters]);
+  }, [getAuthenticatedClient]);
 
   // Update URL Parameters
   const updateUrlParams = useCallback((filters) => {
@@ -240,17 +239,19 @@ export function PerformanceProvider({ children }) {
 
   // Fetch data when filters change
   useEffect(() => {
-    if (client && !state.loadingState.initial) {
-      fetchData();
+    if (!state.loadingState.initial) {
+      fetchData(state.filters);
     }
-  }, [state.filters, client]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.filters.startDate, state.filters.endDate, state.filters.department, state.filters.project]);
 
   // Initial data fetch
   useEffect(() => {
-    if (client && state.loadingState.initial) {
-      fetchData();
+    if (state.loadingState.initial) {
+      fetchData(state.filters);
     }
-  }, [client]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const value = {
     state,

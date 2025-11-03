@@ -7,6 +7,7 @@
 import { Card, CardHeader, CardContent, Skeleton } from '@mui/material';
 import { useDashboard } from '../../context/DashboardContext';
 import { PieChart } from '../charts/PieChart';
+import { EmptyState } from '../common/EmptyState';
 import { transformToPieChartData } from '../../services/dataTransformer';
 
 /**
@@ -34,7 +35,12 @@ export const BudgetChartSection = () => {
       <Card>
         <CardHeader title="예산 배분 현황" />
         <CardContent>
-          <p>데이터가 없습니다.</p>
+          <EmptyState
+            title="예산 데이터가 없습니다"
+            description="예산 배분 현황을 확인할 수 있는 데이터가 없습니다."
+            icon="chart"
+            minimal
+          />
         </CardContent>
       </Card>
     );

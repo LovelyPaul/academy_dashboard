@@ -5,6 +5,7 @@
 import React, { useMemo } from 'react';
 import { Card } from '../../../components/common/Card';
 import { BarChart } from '../../../components/charts/BarChart';
+import { EmptyState } from '../../../components/common/EmptyState';
 import { transformToBarChartData } from '../../../services/dataTransformer';
 import { usePapersContext } from '../PapersContext';
 
@@ -17,7 +18,7 @@ export function FieldChart() {
       return null;
     }
     return transformToBarChartData(fieldData, 'department', 'count', {
-      label: 'Publications',
+      label: '논문 수',
       backgroundColor: 'rgba(54, 162, 235, 0.6)',
       borderColor: 'rgba(54, 162, 235, 1)'
     });
@@ -32,7 +33,7 @@ export function FieldChart() {
       },
       title: {
         display: true,
-        text: 'Publications by Field'
+        text: '분야별 논문 수'
       }
     },
     scales: {
@@ -47,9 +48,9 @@ export function FieldChart() {
 
   if (isLoading) {
     return (
-      <Card title="Field Statistics">
+      <Card title="분야별 통계">
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          Loading...
+          로딩 중...
         </div>
       </Card>
     );
@@ -57,16 +58,19 @@ export function FieldChart() {
 
   if (!chartData) {
     return (
-      <Card title="Field Statistics">
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          No data available
-        </div>
+      <Card title="분야별 통계">
+        <EmptyState
+          title="분야별 데이터가 없습니다"
+          description="분야별 논문 통계를 확인할 수 있는 데이터가 없습니다."
+          icon="chart"
+          minimal
+        />
       </Card>
     );
   }
 
   return (
-    <Card title="Field Statistics">
+    <Card title="분야별 통계">
       <BarChart data={chartData} options={chartOptions} />
     </Card>
   );

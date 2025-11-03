@@ -86,13 +86,14 @@ const BudgetContext = createContext(undefined);
 // Provider
 export function BudgetProvider({ children }) {
   const [state, dispatch] = useReducer(budgetReducer, initialState);
-  const { apiClient } = useApiClient();
+  const { getAuthenticatedClient } = useApiClient();
 
   // Fetch all budget data
   const fetchBudgetData = useCallback(async () => {
     dispatch({ type: 'FETCH_INIT' });
 
     try {
+      const apiClient = await getAuthenticatedClient();
       const { filters } = state;
 
       // Build query params
@@ -107,9 +108,9 @@ export function BudgetProvider({ children }) {
 
       // Parallel API calls
       const [allocationRes, executionRes, trendsRes] = await Promise.all([
-        apiClient.get(`/budget/allocation/?${paramString}`),
-        apiClient.get(`/budget/execution/?${paramString}`),
-        apiClient.get(`/budget/trends/?${paramString}`),
+        apiClient.get(`/dashboard/budget/allocation${paramString ? '?' + paramString : ''}`),
+        apiClient.get(`/dashboard/budget/execution${paramString ? '?' + paramString : ''}`),
+        apiClient.get(`/dashboard/budget/trends${paramString ? '?' + paramString : ''}`),
       ]);
 
       dispatch({
@@ -130,7 +131,7 @@ export function BudgetProvider({ children }) {
         },
       });
     }
-  }, [state.filters, apiClient]);
+  }, [state.filters, getAuthenticatedClient]);
 
   // Auto-fetch on mount and filter changes
   useEffect(() => {

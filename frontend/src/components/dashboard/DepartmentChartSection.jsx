@@ -7,6 +7,7 @@
 import { Card, CardHeader, CardContent, Skeleton } from '@mui/material';
 import { useDashboard } from '../../context/DashboardContext';
 import { BarChart } from '../charts/BarChart';
+import { EmptyState } from '../common/EmptyState';
 import { transformToBarChartData } from '../../services/dataTransformer';
 
 /**
@@ -34,7 +35,12 @@ export const DepartmentChartSection = () => {
       <Card>
         <CardHeader title="부서별 성과 비교" />
         <CardContent>
-          <p>데이터가 없습니다.</p>
+          <EmptyState
+            title="부서 데이터가 없습니다"
+            description="부서별 성과를 비교할 수 있는 데이터가 없습니다."
+            icon="chart"
+            minimal
+          />
         </CardContent>
       </Card>
     );

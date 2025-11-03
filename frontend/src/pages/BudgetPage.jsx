@@ -44,7 +44,7 @@ function BudgetPageContent() {
           severity="error"
           action={
             <Button color="inherit" size="small" onClick={retryFetch}>
-              Retry
+              다시 시도
             </Button>
           }
         >
@@ -60,10 +60,10 @@ function BudgetPageContent() {
         {/* Page Header */}
         <Box sx={{ mb: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Budget Analysis
+            예산 분석
           </Typography>
           <Typography variant="body2" color="textSecondary">
-            Department budget allocation, execution status, and yearly trends
+            부서별 예산 배정, 집행 현황 및 연도별 추이
           </Typography>
         </Box>
 
@@ -91,13 +91,13 @@ function BudgetPageContent() {
             onClick={() => toggleView('chart')}
             sx={{ mr: 1 }}
           >
-            Chart View
+            차트 보기
           </Button>
           <Button
             variant={state.selectedView === 'table' ? 'contained' : 'outlined'}
             onClick={() => toggleView('table')}
           >
-            Table View
+            표 보기
           </Button>
         </Box>
 

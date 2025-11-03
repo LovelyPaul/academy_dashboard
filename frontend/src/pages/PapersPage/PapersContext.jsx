@@ -37,7 +37,7 @@ export function PapersProvider({ children }) {
   /**
    * Fetch papers analytics data from API
    */
-  const fetchPapersData = useCallback(async () => {
+  const fetchPapersData = useCallback(async (filters) => {
     dispatch({ type: FETCH_PAPERS_START });
 
     try {
@@ -46,12 +46,12 @@ export function PapersProvider({ children }) {
 
       // Build query parameters
       const params = {};
-      if (state.filters.year) params.year = state.filters.year;
-      if (state.filters.journal) params.journal = state.filters.journal;
-      if (state.filters.field) params.field = state.filters.field;
+      if (filters.year) params.year = filters.year;
+      if (filters.journal) params.journal = filters.journal;
+      if (filters.field) params.field = filters.field;
 
       // Make API request
-      const response = await client.get('/papers/analytics/', { params });
+      const response = await client.get('/dashboard/papers/analytics/', { params });
 
       dispatch({
         type: FETCH_PAPERS_SUCCESS,
@@ -59,12 +59,12 @@ export function PapersProvider({ children }) {
       });
     } catch (error) {
       // Handle authentication errors
-      if (error.response?.status === 401) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
         dispatch({
           type: FETCH_PAPERS_ERROR,
           payload: {
             message: 'Session expired. Please login again.',
-            code: '401'
+            code: error.response?.status?.toString()
           }
         });
         signOut();
@@ -79,7 +79,7 @@ export function PapersProvider({ children }) {
         });
       }
     }
-  }, [getToken, getAuthenticatedClient, state.filters, signOut, navigate]);
+  }, [getToken, getAuthenticatedClient, signOut, navigate]);
 
   /**
    * Set a single filter value
@@ -112,8 +112,9 @@ export function PapersProvider({ children }) {
    * Refetch data when filters change
    */
   useEffect(() => {
-    fetchPapersData();
-  }, [state.filters]);
+    fetchPapersData(state.filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.filters.year, state.filters.journal, state.filters.field]);
 
   /**
    * Memoize context value to prevent unnecessary re-renders

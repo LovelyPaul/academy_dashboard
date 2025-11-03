@@ -5,6 +5,7 @@
 import React, { useMemo } from 'react';
 import { Card } from '../../../components/common/Card';
 import { PieChart } from '../../../components/charts/PieChart';
+import { EmptyState } from '../../../components/common/EmptyState';
 import { transformToPieChartData } from '../../../services/dataTransformer';
 import { usePapersContext } from '../PapersContext';
 
@@ -28,16 +29,16 @@ export function JournalChart() {
       },
       title: {
         display: true,
-        text: 'Publications by Journal Grade'
+        text: '저널 등급별 논문 분포'
       }
     }
   };
 
   if (isLoading) {
     return (
-      <Card title="Journal Grade Distribution">
+      <Card title="저널 등급별 분포">
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          Loading...
+          로딩 중...
         </div>
       </Card>
     );
@@ -45,16 +46,19 @@ export function JournalChart() {
 
   if (!chartData) {
     return (
-      <Card title="Journal Grade Distribution">
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          No data available
-        </div>
+      <Card title="저널 등급별 분포">
+        <EmptyState
+          title="저널 등급 데이터가 없습니다"
+          description="저널 등급별 논문 분포를 확인할 수 있는 데이터가 없습니다."
+          icon="chart"
+          minimal
+        />
       </Card>
     );
   }
 
   return (
-    <Card title="Journal Grade Distribution">
+    <Card title="저널 등급별 분포">
       <PieChart data={chartData} options={chartOptions} />
     </Card>
   );
