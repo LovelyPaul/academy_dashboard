@@ -1,5 +1,5 @@
 # Backend-only Dockerfile for Railway deployment
-# Force rebuild: 2025-11-03-v2
+# Force rebuild: 2025-11-03-v3
 FROM python:3.12-slim
 
 # Set environment variables
@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PORT=8000 \
-    REBUILD_DATE="2025-11-03-16:00"
+    REBUILD_DATE="2025-11-03-20:35"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
