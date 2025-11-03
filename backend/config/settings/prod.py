@@ -3,28 +3,43 @@ Production settings for Railway deployment
 """
 from .base import *
 
-DEBUG = False
+# Set DEBUG based on environment variable
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Get allowed hosts from environment variable
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
     ALLOWED_HOSTS = ['*']  # Allow all hosts if not specified
 
-# Database with connection pooling for Railway
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'postgres'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-        'CONN_MAX_AGE': 600,  # Keep connections alive for 10 minutes
-        'OPTIONS': {
-            'sslmode': 'require',  # Require SSL for production
+# Database configuration
+# Priority: DATABASE_URL > individual env vars > localhost fallback
+import dj_database_url
+
+if os.getenv('DATABASE_URL'):
+    # Use DATABASE_URL if available (Supabase or Railway PostgreSQL)
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # Fallback to individual environment variables
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME', 'postgres'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+            'CONN_MAX_AGE': 600,
+            'OPTIONS': {
+                'sslmode': 'require',
+            }
         }
     }
-}
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -35,17 +50,18 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Security settings for production
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Disable SSL redirect for Railway (Railway handles SSL at the edge)
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False  # Railway proxy handles SSL
+CSRF_COOKIE_SECURE = False  # Railway proxy handles SSL
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
-# HSTS Settings
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# HSTS Settings - disabled for Railway
+# SECURE_HSTS_SECONDS = 31536000  # 1 year
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
 
 # CORS Settings for production
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
