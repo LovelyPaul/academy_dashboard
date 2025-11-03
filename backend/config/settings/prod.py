@@ -17,12 +17,18 @@ import dj_database_url
 
 if os.getenv('DATABASE_URL'):
     # Use DATABASE_URL if available (Supabase or Railway PostgreSQL)
+    db_config = dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+    # Force IPv4 for Railway compatibility (Supabase returns IPv6 which Railway doesn't support)
+    if 'OPTIONS' not in db_config:
+        db_config['OPTIONS'] = {}
+    db_config['OPTIONS']['options'] = '-c default_transaction_isolation=read_committed'
+
     DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+        'default': db_config
     }
 else:
     # Fallback to individual environment variables
