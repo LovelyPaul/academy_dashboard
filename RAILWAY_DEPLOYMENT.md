@@ -1,4 +1,9 @@
-# Railway 배포 가이드
+# Railway 백엔드 배포 가이드
+
+## 배포 전략
+
+**백엔드(Django)**: Railway
+**프론트엔드(React)**: Vercel 또는 Netlify (별도 배포)
 
 ## 문제 해결
 
@@ -8,12 +13,13 @@
 ```
 
 **원인**:
-- Dockerfile에서 Python 베이스 이미지를 사용하지 않음
-- 또는 railway.json에서 NIXPACKS 빌더를 잘못 설정함
+- Python 베이스 이미지 없이 pip 명령 실행 시도
+- railway.json에서 NIXPACKS 빌더 사용 시 환경 설정 누락
 
 **해결 방법**:
-1. 올바른 멀티스테이지 Dockerfile 생성
-2. railway.json을 DOCKERFILE 빌더로 변경
+1. `backend/Dockerfile` 생성 (Python 3.12 베이스 이미지)
+2. `backend/railway.json`을 DOCKERFILE 빌더로 변경
+3. Railway에서 backend 폴더를 Root Directory로 설정
 
 ## 배포 단계
 
@@ -47,12 +53,21 @@ CORS_ALLOWED_ORIGINS=https://yourfrontend.vercel.app,https://yourdomain.com
 FRONTEND_URL=https://yourfrontend.vercel.app
 ```
 
-### 2. Git Push로 배포
+### 2. Railway 프로젝트 설정
+
+**중요**: Railway 대시보드에서 Root Directory 설정
+
+1. Railway 대시보드 → 프로젝트 선택
+2. **"Settings"** 탭 클릭
+3. **"Root Directory"** 설정을 `backend`로 변경
+4. **"Deploy"** 버튼 클릭
+
+### 3. Git Push로 배포
 
 ```bash
 # 변경사항 커밋
-git add Dockerfile .dockerignore railway.json
-git commit -m "feat: Railway 배포 설정 추가"
+git add backend/Dockerfile backend/.dockerignore backend/railway.json
+git commit -m "feat: Railway 백엔드 전용 배포 설정"
 
 # Railway에 푸시 (Railway가 자동으로 배포 시작)
 git push origin main
