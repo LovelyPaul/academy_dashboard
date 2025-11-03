@@ -29,5 +29,4 @@ RUN python manage.py collectstatic --noinput --clear || true
 # Expose port
 EXPOSE 8000
 
-# Run gunicorn (using shell form to allow environment variable substitution)
-CMD gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+# Note: Railway will use the Procfile's 'web' command instead of CMD
