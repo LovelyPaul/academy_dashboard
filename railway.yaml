@@ -6,4 +6,4 @@ services:
 
   frontend:
     root: frontend
-    dockerfile: frontend/Dockerfile
+    dockerfile: Dockerfile
