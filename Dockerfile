@@ -1,5 +1,5 @@
 # Backend-only Dockerfile for Railway deployment
-# Force rebuild: 2025-11-03-v3
+# Force rebuild: 2025-11-03-v4
 FROM python:3.12-slim
 
 # Set environment variables
