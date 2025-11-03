@@ -1,0 +1,46 @@
+# Frontend (not needed for backend deployment)
+frontend/
+
+# Documentation
+*.md
+docs/
+prompts/
+.claude/
+.ruler/
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/**/*.pyc
+backend/.pytest_cache/
+backend/**/.pytest_cache/
+backend/*.db
+backend/*.sqlite3
+
+# Environment files
+backend/.env
+backend/.env.local
+frontend/.env
+frontend/.env.local
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Test files
+backend/test_*.csv
+backend/**/tests/
