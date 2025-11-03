@@ -6,8 +6,8 @@ Follows the plan.md specifications and SOLID principles.
 from decimal import Decimal
 from typing import Dict, List, Any
 
-from backend.utils.formatters import format_percentage, format_currency
-from backend.utils.date_utils import get_current_year
+from utils.formatters import format_percentage, format_currency
+from utils.date_utils import get_current_year
 
 
 class DashboardService:
@@ -557,7 +557,7 @@ class FileValidationService:
     Pure business logic - no persistence logic.
     """
 
-    ALLOWED_EXTENSIONS = ['.xlsx', '.xls']
+    ALLOWED_EXTENSIONS = ['.xlsx', '.xls', '.csv']
     MAX_FILE_SIZE_MB = 10
 
     def validate_file_format(self, filename: str) -> bool:

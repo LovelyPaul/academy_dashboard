@@ -12,7 +12,9 @@ openpyxl==3.1.2
 
 # Clerk Integration
 svix==1.15.0
-clerk-sdk-python==0.1.1
+clerk-sdk-python==0.1.0
+PyJWT==2.8.0
+cryptography==41.0.7
 
 # Python Utilities
 python-dotenv==1.0.0

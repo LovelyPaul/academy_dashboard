@@ -37,10 +37,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'core.middleware.ClerkAuthenticationMiddleware',  # Must be before AuthenticationMiddleware
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middleware.ClerkAuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

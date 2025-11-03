@@ -19,10 +19,10 @@ class ExcelParser:
 
     def parse(self, file_path: str) -> pd.DataFrame:
         """
-        Parse Excel file to DataFrame.
+        Parse Excel or CSV file to DataFrame.
 
         Args:
-            file_path: Path to Excel file
+            file_path: Path to Excel or CSV file
 
         Returns:
             Parsed DataFrame
@@ -31,12 +31,17 @@ class ExcelParser:
             FileProcessingError: If parsing fails
         """
         try:
-            df = pd.read_excel(file_path)
-            logger.info(f"Successfully parsed Excel file: {file_path}")
+            # Detect file type by extension
+            if file_path.lower().endswith('.csv'):
+                df = pd.read_csv(file_path)
+                logger.info(f"Successfully parsed CSV file: {file_path}")
+            else:
+                df = pd.read_excel(file_path)
+                logger.info(f"Successfully parsed Excel file: {file_path}")
             return df
         except Exception as e:
-            logger.error(f"Failed to parse Excel file {file_path}: {e}")
-            raise FileProcessingError(f"Failed to parse Excel file: {e}")
+            logger.error(f"Failed to parse file {file_path}: {e}")
+            raise FileProcessingError(f"Failed to parse file: {e}")
 
     def validate_columns(self, df: pd.DataFrame, required_columns: List[str]) -> bool:
         """
@@ -165,6 +170,7 @@ class DepartmentKPIParser(ExcelParser):
     Parser for Department KPI Excel files.
     Expects columns: year, college, department, employment_rate, full_time_faculty,
                      visiting_faculty, tech_transfer_revenue, intl_conference_count
+    Supports both English and Korean column names.
     """
 
     REQUIRED_COLUMNS = [
@@ -178,6 +184,45 @@ class DepartmentKPIParser(ExcelParser):
         'intl_conference_count'
     ]
 
+    # Korean to English column mapping
+    COLUMN_MAPPING = {
+        '연도': 'year',
+        '평가년도': 'year',  # Alternative column name
+        '단과대학': 'college',
+        '학과': 'department',
+        '취업률': 'employment_rate',
+        '졸업생 취업률 (%)': 'employment_rate',  # Alternative column name
+        '전임교원수': 'full_time_faculty',
+        '전임교원 수 (명)': 'full_time_faculty',  # Alternative column name
+        '겸임교원수': 'visiting_faculty',
+        '초빙교원 수 (명)': 'visiting_faculty',  # Alternative column name
+        '기술이전수익': 'tech_transfer_revenue',
+        '연간 기술이전 수입액 (억원)': 'tech_transfer_revenue',  # Alternative column name
+        '국제학술대회수': 'intl_conference_count',
+        '국제학술대회 개최 횟수': 'intl_conference_count'  # Alternative column name
+    }
+
+    def translate_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Translate Korean column names to English.
+
+        Args:
+            df: DataFrame with potentially Korean column names
+
+        Returns:
+            DataFrame with English column names
+        """
+        columns_renamed = {}
+        for col in df.columns:
+            if col in self.COLUMN_MAPPING:
+                columns_renamed[col] = self.COLUMN_MAPPING[col]
+
+        if columns_renamed:
+            logger.info(f"Translating Korean columns: {columns_renamed}")
+            df = df.rename(columns=columns_renamed)
+
+        return df
+
     def parse_to_dict(self, file_path: str) -> List[Dict]:
         """
         Parse Department KPI Excel file.
@@ -189,7 +234,23 @@ class DepartmentKPIParser(ExcelParser):
             List of dictionaries with department KPI data
         """
         logger.info(f"Parsing Department KPI file: {file_path}")
-        return super().parse_to_dict(file_path, self.REQUIRED_COLUMNS)
+
+        # Parse file first
+        df = self.parse(file_path)
+
+        # Translate Korean columns if present
+        df = self.translate_columns(df)
+
+        # Validate columns (now in English)
+        self.validate_columns(df, self.REQUIRED_COLUMNS)
+
+        # Clean data
+        df = self.clean_data(df)
+
+        # Replace NaN with None for JSON compatibility
+        df = df.where(pd.notnull(df), None)
+
+        return df.to_dict('records')
 
 
 class PublicationParser(ExcelParser):
@@ -198,6 +259,7 @@ class PublicationParser(ExcelParser):
     Expects columns: publication_id, publication_date, college, department, title,
                      primary_author, co_authors, journal_name, journal_grade,
                      impact_factor, is_project_linked
+    Supports both English and Korean column names.
     """
 
     REQUIRED_COLUMNS = [
@@ -214,6 +276,47 @@ class PublicationParser(ExcelParser):
         'is_project_linked'
     ]
 
+    # Korean to English column mapping
+    COLUMN_MAPPING = {
+        '논문ID': 'publication_id',
+        '게재일': 'publication_date',
+        '발행일자': 'publication_date',  # Alternative column name
+        '단과대학': 'college',
+        '학과': 'department',
+        '논문제목': 'title',
+        '제목': 'title',  # Alternative column name
+        '주저자': 'primary_author',
+        '참여저자': 'co_authors',
+        '공동저자': 'co_authors',  # Alternative column name
+        '학술지명': 'journal_name',
+        '저널명': 'journal_name',  # Alternative column name
+        '저널등급': 'journal_grade',
+        'Impact Factor': 'impact_factor',
+        '임팩트팩터': 'impact_factor',  # Alternative column name
+        '과제연계여부': 'is_project_linked'
+    }
+
+    def translate_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Translate Korean column names to English.
+
+        Args:
+            df: DataFrame with potentially Korean column names
+
+        Returns:
+            DataFrame with English column names
+        """
+        columns_renamed = {}
+        for col in df.columns:
+            if col in self.COLUMN_MAPPING:
+                columns_renamed[col] = self.COLUMN_MAPPING[col]
+
+        if columns_renamed:
+            logger.info(f"Translating Korean columns: {columns_renamed}")
+            df = df.rename(columns=columns_renamed)
+
+        return df
+
     def parse_to_dict(self, file_path: str) -> List[Dict]:
         """
         Parse Publication Excel file.
@@ -225,17 +328,47 @@ class PublicationParser(ExcelParser):
             List of dictionaries with publication data
         """
         logger.info(f"Parsing Publication file: {file_path}")
-        data = super().parse_to_dict(file_path, self.REQUIRED_COLUMNS)
 
-        # Convert publication_date to string format
+        # Parse file first
+        df = self.parse(file_path)
+
+        # Translate Korean columns if present
+        df = self.translate_columns(df)
+
+        # Validate columns (now in English)
+        self.validate_columns(df, self.REQUIRED_COLUMNS)
+
+        # Clean data
+        df = self.clean_data(df)
+
+        # Replace NaN with None for JSON compatibility
+        df = df.where(pd.notnull(df), None)
+
+        data = df.to_dict('records')
+
+        # Convert publication_date to string format and handle NaN values
         for item in data:
             if item.get('publication_date'):
                 if isinstance(item['publication_date'], pd.Timestamp):
                     item['publication_date'] = item['publication_date'].strftime('%Y-%m-%d')
 
             # Convert is_project_linked to boolean
-            if 'is_project_linked' in item:
-                item['is_project_linked'] = bool(item['is_project_linked'])
+            if 'is_project_linked' in item and item['is_project_linked'] is not None:
+                # Handle various boolean representations
+                val = item['is_project_linked']
+                if isinstance(val, str):
+                    item['is_project_linked'] = val.upper() in ('Y', 'YES', 'TRUE', '1')
+                else:
+                    item['is_project_linked'] = bool(val)
+            else:
+                item['is_project_linked'] = False
+
+            # Explicitly handle NaN values for numeric fields
+            # impact_factor can be None (null=True in model)
+            if 'impact_factor' in item:
+                val = item['impact_factor']
+                if pd.isna(val):  # Check for NaN
+                    item['impact_factor'] = None
 
         return data
 
@@ -245,6 +378,7 @@ class StudentParser(ExcelParser):
     Parser for Student Roster Excel files.
     Expects columns: student_id, name, college, department, grade, program_type,
                      enrollment_status, gender, admission_year, advisor, email
+    Supports both English and Korean column names.
     """
 
     REQUIRED_COLUMNS = [
@@ -261,6 +395,43 @@ class StudentParser(ExcelParser):
         'email'
     ]
 
+    # Korean to English column mapping
+    COLUMN_MAPPING = {
+        '학번': 'student_id',
+        '이름': 'name',
+        '단과대학': 'college',
+        '학과': 'department',
+        '학년': 'grade',
+        '과정구분': 'program_type',
+        '학적상태': 'enrollment_status',
+        '성별': 'gender',
+        '입학년도': 'admission_year',
+        '지도교수': 'advisor',
+        '이메일': 'email'
+    }
+
+    def translate_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Translate Korean column names to English.
+
+        Args:
+            df: DataFrame with potentially Korean column names
+
+        Returns:
+            DataFrame with English column names
+        """
+        # Create reverse mapping for any columns that match Korean names
+        columns_renamed = {}
+        for col in df.columns:
+            if col in self.COLUMN_MAPPING:
+                columns_renamed[col] = self.COLUMN_MAPPING[col]
+
+        if columns_renamed:
+            logger.info(f"Translating Korean columns: {columns_renamed}")
+            df = df.rename(columns=columns_renamed)
+
+        return df
+
     def parse_to_dict(self, file_path: str) -> List[Dict]:
         """
         Parse Student Excel file.
@@ -272,7 +443,23 @@ class StudentParser(ExcelParser):
             List of dictionaries with student data
         """
         logger.info(f"Parsing Student file: {file_path}")
-        return super().parse_to_dict(file_path, self.REQUIRED_COLUMNS)
+
+        # Parse file first
+        df = self.parse(file_path)
+
+        # Translate Korean columns if present
+        df = self.translate_columns(df)
+
+        # Validate columns (now in English)
+        self.validate_columns(df, self.REQUIRED_COLUMNS)
+
+        # Clean data
+        df = self.clean_data(df)
+
+        # Replace NaN with None for JSON compatibility
+        df = df.where(pd.notnull(df), None)
+
+        return df.to_dict('records')
 
 
 class ResearchBudgetParser(ExcelParser):
@@ -281,6 +468,7 @@ class ResearchBudgetParser(ExcelParser):
     Expects columns: execution_id, project_number, project_name, principal_investigator,
                      department, funding_agency, total_budget, execution_date,
                      execution_item, execution_amount, status, note
+    Supports both English and Korean column names.
     """
 
     REQUIRED_COLUMNS = [
@@ -298,6 +486,44 @@ class ResearchBudgetParser(ExcelParser):
         'note'
     ]
 
+    # Korean to English column mapping
+    COLUMN_MAPPING = {
+        '집행ID': 'execution_id',
+        '과제번호': 'project_number',
+        '과제명': 'project_name',
+        '연구책임자': 'principal_investigator',
+        '소속학과': 'department',
+        '지원기관': 'funding_agency',
+        '총연구비': 'total_budget',
+        '집행일자': 'execution_date',
+        '집행항목': 'execution_item',
+        '집행금액': 'execution_amount',
+        '상태': 'status',
+        '비고': 'note'
+    }
+
+    def translate_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Translate Korean column names to English.
+
+        Args:
+            df: DataFrame with potentially Korean column names
+
+        Returns:
+            DataFrame with English column names
+        """
+        # Create reverse mapping for any columns that match Korean names
+        columns_renamed = {}
+        for col in df.columns:
+            if col in self.COLUMN_MAPPING:
+                columns_renamed[col] = self.COLUMN_MAPPING[col]
+
+        if columns_renamed:
+            logger.info(f"Translating Korean columns: {columns_renamed}")
+            df = df.rename(columns=columns_renamed)
+
+        return df
+
     def parse_to_dict(self, file_path: str) -> List[Dict]:
         """
         Parse Research Budget Excel file.
@@ -309,7 +535,23 @@ class ResearchBudgetParser(ExcelParser):
             List of dictionaries with research budget data
         """
         logger.info(f"Parsing Research Budget file: {file_path}")
-        data = super().parse_to_dict(file_path, self.REQUIRED_COLUMNS)
+
+        # Parse file first
+        df = self.parse(file_path)
+
+        # Translate Korean columns if present
+        df = self.translate_columns(df)
+
+        # Validate columns (now in English)
+        self.validate_columns(df, self.REQUIRED_COLUMNS)
+
+        # Clean data
+        df = self.clean_data(df)
+
+        # Replace NaN with None for JSON compatibility
+        df = df.where(pd.notnull(df), None)
+
+        data = df.to_dict('records')
 
         # Convert execution_date to string format
         for item in data:
@@ -361,6 +603,7 @@ class ParserFactory:
     def detect_file_type(columns: List[str]) -> str:
         """
         Detect file type based on column names.
+        Supports both English and Korean column names.
 
         Args:
             columns: List of column names from Excel file
@@ -373,7 +616,7 @@ class ParserFactory:
         """
         column_set = set(columns)
 
-        # Check each parser's required columns
+        # Check each parser's required columns (English)
         if set(DepartmentKPIParser.REQUIRED_COLUMNS).issubset(column_set):
             return 'department_kpi'
         elif set(PublicationParser.REQUIRED_COLUMNS).issubset(column_set):
@@ -382,8 +625,42 @@ class ParserFactory:
             return 'student_roster'
         elif set(ResearchBudgetParser.REQUIRED_COLUMNS).issubset(column_set):
             return 'research_project_data'
-        else:
-            raise FileProcessingError(
-                f"Could not detect file type from columns: {columns}. "
-                "File must match one of the supported formats."
-            )
+
+        # Check for Korean column names by translating and checking if all required columns are present
+        # Try DepartmentKPIParser
+        parser = DepartmentKPIParser()
+        df_temp = pd.DataFrame(columns=columns)
+        df_translated = parser.translate_columns(df_temp)
+        if set(DepartmentKPIParser.REQUIRED_COLUMNS).issubset(set(df_translated.columns)):
+            logger.info("Detected Korean column names for department KPI")
+            return 'department_kpi'
+
+        # Try PublicationParser
+        parser = PublicationParser()
+        df_temp = pd.DataFrame(columns=columns)
+        df_translated = parser.translate_columns(df_temp)
+        if set(PublicationParser.REQUIRED_COLUMNS).issubset(set(df_translated.columns)):
+            logger.info("Detected Korean column names for publication list")
+            return 'publication_list'
+
+        # Try StudentParser
+        parser = StudentParser()
+        df_temp = pd.DataFrame(columns=columns)
+        df_translated = parser.translate_columns(df_temp)
+        if set(StudentParser.REQUIRED_COLUMNS).issubset(set(df_translated.columns)):
+            logger.info("Detected Korean column names for student roster")
+            return 'student_roster'
+
+        # Try ResearchBudgetParser
+        parser = ResearchBudgetParser()
+        df_temp = pd.DataFrame(columns=columns)
+        df_translated = parser.translate_columns(df_temp)
+        if set(ResearchBudgetParser.REQUIRED_COLUMNS).issubset(set(df_translated.columns)):
+            logger.info("Detected Korean column names for research project data")
+            return 'research_project_data'
+
+        # If no match found, raise error
+        raise FileProcessingError(
+            f"Could not detect file type from columns: {columns}. "
+            "File must match one of the supported formats."
+        )

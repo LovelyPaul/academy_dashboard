@@ -28,6 +28,7 @@ class ClerkAuthenticationMiddleware:
                 # Verify Clerk JWT token
                 user = self._verify_clerk_token(token)
                 request.user = user
+                logger.info(f"User authenticated: {user}, is_authenticated: {user.is_authenticated if hasattr(user, 'is_authenticated') else 'N/A'}")
             except Exception as e:
                 logger.warning(f"Clerk token verification failed: {e}")
                 request.user = AnonymousUser()
@@ -60,13 +61,29 @@ class ClerkAuthenticationMiddleware:
             clerk_id = decoded_token.get('sub')
 
             if clerk_id:
-                user = User.objects.get(clerk_id=clerk_id)
+                # Try to get existing user, or create new one (temporary solution)
+                try:
+                    user = User.objects.get(clerk_id=clerk_id)
+                except User.DoesNotExist:
+                    # Auto-create user from JWT token (temporary for development)
+                    email = decoded_token.get('email', f'{clerk_id}@temp.com')
+                    username = email.split('@')[0] if email else clerk_id[:30]
+
+                    user = User.objects.create(
+                        clerk_id=clerk_id,
+                        email=email,
+                        username=username[:150],  # Django username max length
+                        first_name=decoded_token.get('given_name', ''),
+                        last_name=decoded_token.get('family_name', ''),
+                    )
+                    logger.info(f"Auto-created user from JWT token: {email}")
+
                 return user
             else:
                 return AnonymousUser()
 
-        except (jwt.DecodeError, User.DoesNotExist) as e:
-            logger.warning(f"Token decode error or user not found: {e}")
+        except jwt.DecodeError as e:
+            logger.warning(f"Token decode error: {e}")
             return AnonymousUser()
         except Exception as e:
             logger.error(f"Unexpected error in token verification: {e}")

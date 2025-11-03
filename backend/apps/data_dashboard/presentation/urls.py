@@ -5,7 +5,7 @@ Following the common-modules.md specification.
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import DashboardViewSet, PerformanceViewSet, PapersAnalyticsViewSet, BudgetAnalysisViewSet, UploadViewSet
+from .views_main import DashboardViewSet, PerformanceViewSet, PapersAnalyticsViewSet, BudgetAnalysisViewSet, UploadViewSet
 from .views.students_views import StudentsViewSet
 
 app_name = 'data_dashboard'

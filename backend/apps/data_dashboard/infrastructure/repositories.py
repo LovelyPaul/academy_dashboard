@@ -9,7 +9,7 @@ from django.db.models.functions import ExtractYear
 from datetime import datetime
 
 from ..models import DepartmentKPI, Publication, Student, ResearchBudgetData
-from backend.utils.date_utils import get_current_year
+from utils.date_utils import get_current_year
 
 
 class DashboardRepository:

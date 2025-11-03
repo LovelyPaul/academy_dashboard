@@ -4,9 +4,9 @@ Tests repository, service, and use case layers.
 """
 from django.test import TestCase
 from apps.data_dashboard.models import Student
-from apps.data_dashboard.infrastructure.repositories.student_repository import StudentRepository
-from apps.data_dashboard.domain.services.student_analytics_service import StudentAnalyticsService
-from apps.data_dashboard.application.use_cases.get_students_analytics_use_case import GetStudentsAnalyticsUseCase
+from apps.data_dashboard.infrastructure.repositories import StudentRepository
+from apps.data_dashboard.domain.services import StudentAnalyticsService
+from apps.data_dashboard.application.use_cases import GetStudentsAnalyticsUseCase
 from core.exceptions import ValidationError
 
 

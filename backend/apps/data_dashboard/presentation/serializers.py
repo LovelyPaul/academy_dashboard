@@ -431,7 +431,7 @@ class UploadFileSerializer(serializers.Serializer):
     file = serializers.FileField(
         required=True,
         allow_empty_file=False,
-        help_text="Excel file (.xlsx or .xls), max 10MB"
+        help_text="Excel or CSV file (.xlsx, .xls, or .csv), max 10MB"
     )
 
     def validate_file(self, value):
@@ -448,9 +448,9 @@ class UploadFileSerializer(serializers.Serializer):
             ValidationError: If file is invalid
         """
         # Check extension
-        if not value.name.endswith(('.xlsx', '.xls')):
+        if not value.name.endswith(('.xlsx', '.xls', '.csv')):
             raise serializers.ValidationError(
-                "Invalid file format. Only .xlsx and .xls files are allowed."
+                "Invalid file format. Only .xlsx, .xls, and .csv files are allowed."
             )
 
         # Check size (10MB = 10 * 1024 * 1024 bytes)

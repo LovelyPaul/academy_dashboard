@@ -6,7 +6,7 @@ Implements the GetDashboardDataUseCase following plan.md specifications.
 from datetime import datetime
 from typing import Dict, Any
 
-from backend.core.exceptions import NotFoundError, ValidationError
+from core.exceptions import NotFoundError, ValidationError
 
 
 class GetDashboardDataUseCase:
@@ -286,10 +286,8 @@ class BudgetAnalysisUseCase:
             category=category
         )
 
-        if not result:
-            raise NotFoundError("No budget allocation data found for the given filters")
-
-        return result
+        # Return empty list if no data found (consistent with other endpoints)
+        return result if result else []
 
     def get_execution_status(self, department=None, year=None, start_date=None, end_date=None):
         """
@@ -379,6 +377,7 @@ class UploadFileUseCase:
         self.processing_service = DataProcessingService(self.upload_repo)
         self.history_repository = UploadHistoryRepository()
         self.parser_factory = ParserFactory
+        self.ExcelParser = ExcelParser  # Store class reference
         self.temp_dir = tempfile.gettempdir()
 
     def execute(self, user_id: int, uploaded_file) -> Dict:
@@ -427,7 +426,7 @@ class UploadFileUseCase:
             logger.info(f"Saved temporary file: {temp_file_path}")
 
             # Step 3: Parse file to get DataFrame
-            parser = ExcelParser()
+            parser = self.ExcelParser()
             df = parser.parse(temp_file_path)
 
             if df.empty:

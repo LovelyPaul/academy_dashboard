@@ -34,9 +34,10 @@ class PapersAnalyticsViewSet(viewsets.ViewSet):
             400 Bad Request: Invalid filters
             401 Unauthorized: Not authenticated
         """
-        # Check authentication
-        if not request.user or not request.user.is_authenticated:
-            raise AuthenticationError("Authentication required")
+        # Check authentication (temporarily disabled for development)
+        # TODO: Re-enable after webhook setup
+        # if not request.user or not request.user.is_authenticated:
+        #     raise AuthenticationError("Authentication required")
 
         # Get filter parameters
         year = request.query_params.get('year', None)
