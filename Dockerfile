@@ -1,5 +1,5 @@
 # Backend-only Dockerfile for Railway deployment
-# Updated: 2025-11-03 - Force rebuild
+# Force rebuild: 2025-11-03-v2
 FROM python:3.12-slim
 
 # Set environment variables
@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PORT=8000
+    PORT=8000 \
+    REBUILD_DATE="2025-11-03-16:00"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -21,6 +22,9 @@ WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
+
+# Cache buster - force rebuild of subsequent layers
+RUN echo "Build timestamp: $(date)" > /build-info.txt
 
 # Copy application code
 COPY backend/ .
