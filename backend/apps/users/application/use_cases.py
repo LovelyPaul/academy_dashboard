@@ -43,13 +43,29 @@ class UserWebhookUseCase:
         # Extract user data from event
         clerk_id = event_data.get('id')
         email_addresses = event_data.get('email_addresses', [])
-        email = email_addresses[0]['email_address'] if email_addresses else None
+
+        # Try to get email from email_addresses array or primary_email_address_id
+        email = None
+        if email_addresses and len(email_addresses) > 0:
+            # Handle both dict format and potential nested structure
+            if isinstance(email_addresses[0], dict):
+                email = email_addresses[0].get('email_address')
+            elif isinstance(email_addresses[0], str):
+                email = email_addresses[0]
+
+        # Fallback to other possible email fields
+        if not email:
+            email = event_data.get('email') or event_data.get('primary_email_address')
+
         first_name = event_data.get('first_name')
         last_name = event_data.get('last_name')
 
+        # Log event data for debugging
+        logger.info(f"Processing {event_type} event - clerk_id: {clerk_id}, email: {email}")
+
         # Validate required fields
         if not clerk_id or not email:
-            error_msg = f"Invalid Clerk webhook event data: missing clerk_id or email for type {event_type}"
+            error_msg = f"Invalid Clerk webhook event data: missing clerk_id or email for type {event_type}. Event data: {event_data.keys()}"
             logger.error(error_msg)
             raise ValueError(error_msg)
 
