@@ -1,0 +1,9 @@
+services:
+  backend:
+    root: ./
+    dockerfile: Dockerfile
+    healthcheckPath: /api/health/
+
+  frontend:
+    root: frontend
+    dockerfile: frontend/Dockerfile
