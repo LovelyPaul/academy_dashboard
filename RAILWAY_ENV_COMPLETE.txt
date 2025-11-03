@@ -1,0 +1,192 @@
+# Railway 환경 변수 설정 - 전체 가이드
+
+## 🔧 백엔드 환경 변수 (Backend Service)
+
+Railway Dashboard → backend 서비스 → Variables 탭
+
+### Django 기본 설정
+DJANGO_SETTINGS_MODULE=config.settings.prod
+SECRET_KEY=jw+@l07gu*e$hl64g0d!s=na(782+uj9$tf1k)yyy&\8v=pw)f
+DEBUG=False
+
+### 허용된 호스트 (초기 설정)
+ALLOWED_HOSTS=*.railway.app
+
+### 데이터베이스 (Supabase)
+⚠️ 실제 Supabase 값으로 변경하세요
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=YOUR_SUPABASE_PASSWORD_HERE
+DB_HOST=db.uzsexjgqglhwsbmrmymu.supabase.co
+DB_PORT=5432
+
+### Clerk 인증
+⚠️ 실제 Clerk 키로 변경하세요
+CLERK_SECRET_KEY=YOUR_CLERK_SECRET_KEY_HERE
+
+### CORS 설정 (초기 - 임시)
+CORS_ALLOW_ALL_ORIGINS=True
+
+---
+
+## 📱 프론트엔드 환경 변수 (Frontend Service)
+
+Railway Dashboard → frontend 서비스 → Variables 탭
+
+### API 연결
+⚠️ 백엔드 배포 후 실제 URL로 변경하세요
+REACT_APP_API_URL=https://backend-production.railway.app
+
+### Clerk 공개 키
+⚠️ 실제 Clerk 공개 키로 변경하세요
+REACT_APP_CLERK_PUBLISHABLE_KEY=YOUR_CLERK_PUBLISHABLE_KEY_HERE
+
+### 빌드 최적화
+GENERATE_SOURCEMAP=false
+
+---
+
+## 🔄 프론트엔드 배포 후 백엔드 환경 변수 업데이트
+
+프론트엔드 URL을 얻은 후 백엔드 환경 변수를 업데이트합니다.
+
+Railway Dashboard → backend 서비스 → Variables 탭
+
+### 삭제할 환경 변수
+CORS_ALLOW_ALL_ORIGINS (삭제)
+
+### 추가할 환경 변수
+⚠️ 실제 프론트엔드 URL로 변경하세요
+CORS_ALLOWED_ORIGINS=https://frontend-production.railway.app
+
+### 업데이트할 환경 변수
+⚠️ 기존 값에 프론트엔드 도메인 추가
+ALLOWED_HOSTS=*.railway.app,frontend-production.railway.app
+
+---
+
+## 🔐 Clerk Webhook 설정 후 추가
+
+Clerk webhook 설정 완료 후 백엔드 환경 변수에 추가:
+
+Railway Dashboard → backend 서비스 → Variables 탭
+
+CLERK_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
+
+---
+
+## 📋 환경 변수 확인 방법
+
+### Supabase 정보 확인
+1. https://supabase.com/dashboard 접속
+2. 프로젝트 선택
+3. Settings → Database
+4. Connection String 섹션:
+   - Host: db.uzsexjgqglhwsbmrmymu.supabase.co
+   - Database name: postgres
+   - Port: 5432
+   - User: postgres
+   - Password: "Show password" 클릭하여 복사
+
+### Clerk Secret Key 확인
+1. https://dashboard.clerk.com 접속
+2. 프로젝트 선택
+3. API Keys 메뉴
+4. Secret Keys 섹션에서 복사
+   - 형식: sk_live_... 또는 sk_test_...
+
+### Clerk Publishable Key 확인
+1. https://dashboard.clerk.com 접속
+2. 프로젝트 선택
+3. API Keys 메뉴
+4. Publishable keys 섹션에서 복사
+   - 형식: pk_live_... 또는 pk_test_...
+
+### Clerk Webhook Secret 확인
+1. Clerk Dashboard → Webhooks
+2. 생성한 endpoint 클릭
+3. Signing Secret 복사
+   - 형식: whsec_...
+
+---
+
+## ✅ 배포 순서 및 환경 변수 설정 타이밍
+
+### 1단계: 백엔드 초기 배포
+- DJANGO_SETTINGS_MODULE
+- SECRET_KEY
+- DEBUG
+- ALLOWED_HOSTS (*.railway.app만)
+- DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
+- CLERK_SECRET_KEY
+- CORS_ALLOW_ALL_ORIGINS=True (임시)
+
+### 2단계: 프론트엔드 배포
+- REACT_APP_API_URL (백엔드 URL 사용)
+- REACT_APP_CLERK_PUBLISHABLE_KEY
+- GENERATE_SOURCEMAP
+
+### 3단계: 백엔드 CORS 업데이트
+- CORS_ALLOW_ALL_ORIGINS 삭제
+- CORS_ALLOWED_ORIGINS 추가 (프론트엔드 URL)
+- ALLOWED_HOSTS 업데이트 (프론트엔드 도메인 추가)
+
+### 4단계: Clerk Webhook 설정
+- CLERK_WEBHOOK_SECRET 추가
+
+---
+
+## 🚨 주의사항
+
+1. **SECRET_KEY**: 절대 공개하지 마세요
+2. **DB_PASSWORD**: Supabase에서 정확히 복사
+3. **URL 형식**: 반드시 https:// 포함
+4. **공백 제거**: 모든 값에서 앞뒤 공백 제거
+5. **재배포**: 환경 변수 변경 후 자동 재배포됨
+
+---
+
+## 💡 팁
+
+### Railway CLI로 환경 변수 확인
+```bash
+# Railway CLI 설치
+npm install -g @railway/cli
+
+# 로그인
+railway login
+
+# 프로젝트 연결
+railway link
+
+# 백엔드 환경 변수 확인
+railway variables --service backend
+
+# 프론트엔드 환경 변수 확인
+railway variables --service frontend
+```
+
+### 로컬 테스트용 .env 파일 (백엔드)
+```bash
+# backend/.env
+DJANGO_SETTINGS_MODULE=config.settings.dev
+DEBUG=True
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=YOUR_SUPABASE_PASSWORD
+DB_HOST=db.uzsexjgqglhwsbmrmymu.supabase.co
+DB_PORT=5432
+CLERK_SECRET_KEY=YOUR_CLERK_SECRET_KEY
+```
+
+### 로컬 테스트용 .env 파일 (프론트엔드)
+```bash
+# frontend/.env.local
+REACT_APP_API_URL=http://localhost:8000
+REACT_APP_CLERK_PUBLISHABLE_KEY=YOUR_CLERK_PUBLISHABLE_KEY
+```
+
+---
+
+**작성일:** 2025년 11월 3일
+**목적:** Railway 환경 변수 설정 완전 가이드

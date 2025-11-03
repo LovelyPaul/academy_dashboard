@@ -1,0 +1,44 @@
+# Railway 환경 변수 설정
+# Railway Dashboard → Variables 탭에서 한 줄씩 추가하세요
+
+## Django 설정
+DJANGO_SETTINGS_MODULE=config.settings.prod
+SECRET_KEY=jw+@l07gu*e$hl64g0d!s=na(782+uj9$tf1k)yyy&\8v=pw)f
+DEBUG=False
+ALLOWED_HOSTS=*.railway.app
+
+## 데이터베이스 (Supabase)
+# ⚠️ 실제 Supabase 값으로 변경하세요
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=YOUR_SUPABASE_PASSWORD_HERE
+DB_HOST=db.uzsexjgqglhwsbmrmymu.supabase.co
+DB_PORT=5432
+
+## Clerk 인증
+# ⚠️ 실제 Clerk 키로 변경하세요
+CLERK_SECRET_KEY=YOUR_CLERK_SECRET_KEY_HERE
+
+## CORS 설정 (임시 - 전체 허용)
+CORS_ALLOW_ALL_ORIGINS=True
+
+## 프론트엔드 배포 후 추가할 항목
+# CLERK_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx (Clerk webhook 설정 후)
+# CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app (프론트엔드 URL)
+# ALLOWED_HOSTS=*.railway.app,your-frontend.vercel.app (프론트엔드 도메인 추가)
+
+---
+
+## Supabase 정보 확인 방법
+1. https://supabase.com/dashboard 접속
+2. 프로젝트 선택
+3. Settings → Database
+4. Connection String 섹션에서:
+   - Host: db.uzsexjgqglhwsbmrmymu.supabase.co
+   - Password: "Show password" 클릭하여 복사
+
+## Clerk 키 확인 방법
+1. https://dashboard.clerk.com 접속
+2. 프로젝트 선택
+3. API Keys 메뉴
+4. Secret Keys 섹션에서 복사 (sk_live_... 또는 sk_test_...)
